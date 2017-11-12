@@ -4,7 +4,7 @@ from shapely.geometry import Point, MultiPoint, LineString
 import shapely.ops
 import matplotlib.pyplot as plt
 
-#TODO: Find a better way of handling segments where categorizing of stops fails!
+
 
 class Stop(Point):
     """Represents a bus stop event. Inherits from the shapely.geometry Point class.
@@ -340,6 +340,7 @@ class Route(LineString):
         self.totalTrips = totalTrips
         self.segments = []
 
+
     def split_route_at_signals(self, signalInts, bufferWidth=50, sigRadius=10, debug=True):
         """Splits a Route object into components at SignalizedIntersection points. Returns each as a RoadwaySegment object, stored in the self.segments list.
         segmentID is an int in range(0, number of route segments).
@@ -376,44 +377,6 @@ class Route(LineString):
                     print "Segment Signal Point:", currentSegment.signalPoint.signalID
                     print "Segment Geometry:", currentSegment
                     segmentID += 1
-
-
-    # def split_route_at_signals(self, signalInts, bufferWidth=50, sigRadius=10, debug=True):
-    #     """Splits a Route object into components at SignalizedIntersection points. Returns each as a RoadwaySegment object, stored in the self.segments list.
-    #     segmentID is an int in range(0, number of route segments).
-    #     Segments that do not end at SignalizedIntersections are dropped.
-    #     signalInts = list of SignalizedIntersection objects, will be filtered by _get_buffer_signals using a buffer = bufferWidth
-    #     """
-    #     self._get_filt_signals(signalInts, bufferWidth)
-    #     snappedSignals = MultiPoint([self.interpolate(self.project(signal)) for signal in self.filteredSignals])
-    #     splitSegments = shapely.ops.split(self, snappedSignals) #Split segment geometry
-    #     segmentID = 1
-    #     #TODO: Find a better way to implement creation of RoadwaySements that end in SignalizedIntersection objects, current way is convoluted and slow
-    #     tempFiltSignals = self.filteredSignals[:]
-    #     for segment in splitSegments:
-    #         strSegID = str(self.routeName)+'_'+str(segmentID) #Create unique identifier for each segment where self.routeName_1 is the first segment
-    #         currentSig = None
-    #         for signal in tempFiltSignals:
-    #             locOnSeg = self.interpolate(self.project(signal))
-    #             if Point(segment.coords[-1]).buffer(sigRadius).intersects(locOnSeg): #Find signal corresponding to end of segment
-    #                 currentSig = signal
-    #                 if debug:
-    #                     print "Current Signal:", currentSig.signalID
-    #                 break
-    #         if currentSig == None:
-    #             # print "!"
-    #             segmentID += 1
-    #             continue
-    #         else:
-    #             currentSegment = RoadwaySegment(self.routeName, strSegID, currentSig, segment, self.stopEvents, self.totalTrips)
-    #             self.segments.append(currentSegment)
-    #             tempFiltSignals.remove(currentSig)
-    #             if debug:
-    #                 print "Segment Added:", currentSegment.segmentID
-    #                 print "Signal ID:", currentSig.signalID
-    #                 print "Segment Signal Point:", currentSegment.signalPoint.signalID
-    #                 print "Segment Geometry:", currentSegment
-    #                 segmentID += 1
 
 
     def calc_ranking_index(self, printing=True, plotting=True):
@@ -531,8 +494,8 @@ def cut_line_at_points(line, points):
 
 
 
-
 if __name__ == '__main__':
+#Model data for testing of method is provided below
 
     """Build test stop events"""
     def make_stops(signals):
@@ -557,31 +520,6 @@ if __name__ == '__main__':
     testRoute.split_route_at_signals(testSignals, bufferWidth=1001)
     testRoute2 = Route('SR 436_DOWN', testRouteMuiltiString2, numTrips, stopEvents2) #Build tip: routeName, route.geometry, group.size, grouped stopEvents by routeID
     testRoute2.split_route_at_signals(testSignals)
-
+    
     """Run metrics and display for each segment in route"""
-    # for segment in testRoute.segments:
-    #     try:
-    #         segment.run_segment_metrics()
-    #         segment.print_metrics()
-    #         # segment.plot_classification()
-    #     except Exception:
-    #         print "%s failed" % segment.segmentID
-    #         pass
-    # for segment in testRoute2.segments:
-    #     try:
-    #         segment.run_segment_metrics()
-    #         segment.print_metrics()
-    #         # segment.plot_classification()
-    #     except Exception:
-    #         print "%s failed" % segment.segmentID
-    #         pass
-
-    # for signal in testSignals:
-    #     signal._build_approaches(testRoute)
-    #     signal._build_approaches(testRoute2)
-    #     for approach in signal.approaches:
-    #         print approach.segmentID
-
-    # testRoute.calc_ranking_index()
-    # testRoute2.calc_ranking_index()
     calc_system_ranking_index([testRoute, testRoute2], print_seg_metrics=False, print_ranking=True, plot_seg_classification=False) #Provides simple access to the ranking methods
